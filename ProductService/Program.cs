@@ -15,8 +15,7 @@ builder.Logging.SetMinimumLevel(builder.Environment.IsDevelopment() ? LogLevel.D
 // Supply Cors__AllowedOrigins__0, Cors__AllowedOrigins__1, ... in hosting.
 var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
     ?? (builder.Environment.IsDevelopment() ? new[] { "http://localhost:3000" } : Array.Empty<string>());
-if (!builder.Environment.IsDevelopment() && allowedOrigins.Length == 0)
-    throw new InvalidOperationException("Configure Cors:AllowedOrigins for the deployed frontend.");
+// With no configured production origins, cross-origin browser access stays disabled.
 
 builder.Services.AddCors(options =>
 {
