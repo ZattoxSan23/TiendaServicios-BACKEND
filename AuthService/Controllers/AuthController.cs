@@ -11,10 +11,12 @@ namespace AuthService.Controllers
     public class AuthController : ControllerBase
     {
         private readonly AuthServiceClass _authService;
+        private readonly ILogger<AuthController> _logger;
 
-        public AuthController(AuthServiceClass authService)
+        public AuthController(AuthServiceClass authService, ILogger<AuthController> logger)
         {
             _authService = authService;
+            _logger = logger;
         }
 
         [HttpPost("register")]
@@ -35,7 +37,8 @@ namespace AuthService.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = "Error interno del servidor", details = ex.Message });
+                _logger.LogError(ex, "Registration failed");
+                return StatusCode(500, new { error = "Error interno del servidor" });
             }
         }
 
@@ -60,8 +63,8 @@ namespace AuthService.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error en login: {ex}");
-                return StatusCode(500, new { error = "Error interno del servidor", details = ex.Message });
+                _logger.LogError(ex, "Login failed");
+                return StatusCode(500, new { error = "Error interno del servidor" });
             }
         }
     }
