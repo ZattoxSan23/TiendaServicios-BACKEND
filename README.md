@@ -22,7 +22,7 @@ dotnet run --project AuthService --urls http://localhost:5003
 dotnet run --project ProductService --urls http://localhost:5174
 ```
 
-En desarrollo se admite por defecto `http://localhost:3000`. Producción exige configurar los orígenes. No se admite un comodín con credenciales.
+En desarrollo se admite por defecto `http://localhost:3000`. En producción, las llamadas de navegador desde otros orígenes requieren configurar esta lista; si está vacía se mantiene deshabilitado CORS sin impedir el arranque de la API. No se admite un comodín con credenciales.
 
 AuthService requiere aplicar sus migraciones antes de usarlo. Ambos servicios incluyen migraciones, pero ProductService todavía llama a `EnsureCreated()` al arrancar: hay que unificar esa estrategia antes de operar una base persistente. No mezcles creación automática y migraciones sobre datos reales sin revisar el esquema.
 
