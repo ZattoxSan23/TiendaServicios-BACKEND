@@ -10,12 +10,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
-builder.Logging.SetMinimumLevel(LogLevel.Debug);
+builder.Logging.SetMinimumLevel(builder.Environment.IsDevelopment() ? LogLevel.Debug : LogLevel.Information);
+
+// Supply Cors__AllowedOrigins__0, Cors__AllowedOrigins__1, ... in hosting.
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? (builder.Environment.IsDevelopment() ? new[] { "http://localhost:3000" } : Array.Empty<string>());
+if (!builder.Environment.IsDevelopment() && allowedOrigins.Length == 0)
+    throw new InvalidOperationException("Configure Cors:AllowedOrigins for the deployed frontend.");
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy => policy
-        .WithOrigins("http://localhost:3000")
+        .WithOrigins(allowedOrigins)
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials());
@@ -61,28 +67,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             NameClaimType = ClaimTypes.Name
         };
 
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var header = context.Request.Headers["Authorization"].FirstOrDefault() ?? "";
-                Console.WriteLine($"🔍 [JWT] Raw Header: '{header}'");
-                return Task.CompletedTask;
-            },
-            OnAuthenticationFailed = context =>
-            {
-                Console.WriteLine($"❌ [JWT] Authentication Failed: {context.Exception.Message}");
-                if (context.Exception.InnerException != null)
-                    Console.WriteLine($"   Inner: {context.Exception.InnerException.Message}");
-                return Task.CompletedTask;
-            },
-            OnTokenValidated = context =>
-            {
-                Console.WriteLine("✅ [JWT] TOKEN VÁLIDO");
-                Console.WriteLine($"   User: {context.Principal?.Identity?.Name} | Role: {context.Principal?.FindFirst(ClaimTypes.Role)?.Value}");
-                return Task.CompletedTask;
-            }
-        };
+
     });
 
 builder.Services.AddAuthorization();

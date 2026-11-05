@@ -52,7 +52,8 @@ namespace AuthService.Services
                 FirstName = dto.FirstName,
                 LastName = dto.LastName,
                 Email = dto.Email,
-                Role = dto.Role ?? "Cliente",
+                // Public registration must never grant administrative privileges.
+                Role = "Cliente",
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 PhoneNumber = dto.PhoneNumber,
                 Address = dto.Address,
